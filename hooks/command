@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "--- Sending Samson webhook"
+
+url=${BUILDKITE_PLUGIN_SAMSON_DEPLOY_URL?}
+
+headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" )
+
+payload=$(cat <<EOF
+{
+  "event": "build.finished",
+  "build": {
+    "id": "$BUILDKITE_BUILD_ID",
+    "url": "UNIMPLEMENTED",
+    "web_url": "$BUILDKITE_BUILD_URL",
+    "number": $BUILDKITE_BUILD_NUMBER,
+    "state": "passed",
+    "blocked": false,
+    "message": "$BUILDKITE_MESSAGE",
+    "commit": "$BUILDKITE_COMMIT",
+    "branch": "$BUILDKITE_BRANCH",
+    "tag": null,
+    "source": "$BUILDKITE_SOURCE",
+    "creator": null,
+    "created_at": "1970-01-01 00:00:00 UTC",
+    "scheduled_at": "1970-01-01 00:00:00 UTC",
+    "started_at": "1970-01-01 00:00:00 UTC",
+    "finished_at": "1970-01-01 00:00:00 UTC",
+    "meta_data": {},
+    "pull_request": null
+  },
+  "pipeline": {},
+  "sender": null
+}
+EOF
+)
+
+echo curl \
+    --fail \
+    --request POST \
+    --silent \
+    --show-error \
+    "${headers[@]}" \
+    --data-binary \'"${payload}"\' \
+    "$url"
