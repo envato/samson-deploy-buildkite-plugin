@@ -22,7 +22,8 @@ load "$BATS_PATH/load.bash"
 --silent \
 --show-error \
 -H \"HTTP_X_BUILDKITE_EVENT: build.finished\" \
---data-binary '\'$expected_payload\'' : echo 201"
+-H \"Content-Type: application/json\" \
+-d '\'$expected_payload\'' : echo 201"
 
   run $PWD/hooks/command
 

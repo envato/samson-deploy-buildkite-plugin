@@ -5,7 +5,7 @@ echo "--- Sending Samson webhook"
 
 url=${BUILDKITE_PLUGIN_SAMSON_DEPLOY_URL?}
 
-headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" )
+headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" "-H" "Content-Type: application/json")
 
 payload=$(cat <<EOF
 {
@@ -41,5 +41,5 @@ curl --fail \
     --silent \
     --show-error \
     "${headers[@]}" \
-    --data-binary "${payload}" \
+    -d "${payload}" \
     "$url"
