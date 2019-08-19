@@ -41,5 +41,5 @@ curl --fail \
     --silent \
     --show-error \
     "${headers[@]}" \
-    --data-binary \'"${payload}"\' \
+    --data-binary "${payload}" \
     "$url"
