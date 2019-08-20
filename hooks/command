@@ -5,6 +5,11 @@ echo "--- Sending Samson webhook"
 
 url=${BUILDKITE_PLUGIN_SAMSON_DEPLOY_URL?}
 
+if [[ "${BUILDKITE_PLUGIN_SAMSON_DEPLOY_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  echo "--- :hammer: Enabling debug mode"
+  set -x
+fi
+
 headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" "-H" "Content-Type: application/json")
 
 payload=$(cat <<EOF
