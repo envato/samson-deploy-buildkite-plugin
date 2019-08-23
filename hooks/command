@@ -11,6 +11,7 @@ if [[ "${BUILDKITE_PLUGIN_SAMSON_DEPLOY_DEBUG:-false}" =~ (true|on|1) ]] ; then
 fi
 
 headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" "-H" "Content-Type: application/json")
+message=$(echo $BUILDKITE_MESSAGE | tr '\r\n' ' ')
 
 payload=$(cat <<EOF
 {
@@ -22,7 +23,7 @@ payload=$(cat <<EOF
     "number": $BUILDKITE_BUILD_NUMBER,
     "state": "passed",
     "blocked": false,
-    "message": "$BUILDKITE_MESSAGE",
+    "message": "$message",
     "commit": "$BUILDKITE_COMMIT",
     "branch": "$BUILDKITE_BRANCH",
     "tag": null,
