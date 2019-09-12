@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Upstream PR to add this to the container https://github.com/buildkite-plugins/buildkite-plugin-tester/pull/25
+apk --no-cache add jq
+
 load "$BATS_PATH/load.bash"
 
 # Uncomment to enable stub debugging
