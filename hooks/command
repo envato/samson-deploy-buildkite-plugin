@@ -13,21 +13,26 @@ fi
 headers=( "-H" "HTTP_X_BUILDKITE_EVENT: build.finished" "-H" "Content-Type: application/json")
 message=$(echo $BUILDKITE_MESSAGE | tr '\r\n' ' ')
 
-payload=$(cat <<EOF
-{
+payload=$(jq -n --arg id "$BUILDKITE_BUILD_ID" \
+  --arg url "$BUILDKITE_BUILD_URL" \
+  --arg message "$BUILDKITE_MESSAGE" \
+  --arg num "$BUILDKITE_BUILD_NUMBER" \
+  --arg commit "$BUILDKITE_COMMIT" \
+  --arg branch "$BUILDKITE_BRANCH" \
+  --arg source "$BUILDKITE_SOURCE" '{
   "event": "build.finished",
   "build": {
-    "id": "$BUILDKITE_BUILD_ID",
+    "id": $id,
     "url": "UNIMPLEMENTED",
-    "web_url": "$BUILDKITE_BUILD_URL",
-    "number": $BUILDKITE_BUILD_NUMBER,
+    "web_url": $url,
+    "number": $num | tonumber,
     "state": "passed",
     "blocked": false,
-    "message": "$message",
-    "commit": "$BUILDKITE_COMMIT",
-    "branch": "$BUILDKITE_BRANCH",
+    "message": $message,
+    "commit": $commit,
+    "branch": $branch,
     "tag": null,
-    "source": "$BUILDKITE_SOURCE",
+    "source": $source,
     "creator": null,
     "created_at": "1970-01-01 00:00:00 UTC",
     "scheduled_at": "1970-01-01 00:00:00 UTC",
@@ -38,9 +43,7 @@ payload=$(cat <<EOF
   },
   "pipeline": {},
   "sender": null
-}
-EOF
-)
+}')
 
 curl --fail \
     --request POST \
