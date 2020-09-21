@@ -44,10 +44,37 @@ payload=$(jq -n --arg id "$BUILDKITE_BUILD_ID" \
   "sender": null
 }')
 
-curl --fail \
-    --request POST \
+tmpdir="$(mktemp -d)"
+code=$(curl --request POST \
     --silent \
-    --show-error \
+    -o "$tmpdir/samson_output" \
+    -w "%{http_code}" \
     "${headers[@]}" \
     -d "${payload}" \
-    "$url"
+    "$url")
+
+case "$code" in
+  2*)
+    ret=0
+    ;;
+  4*)
+    ret=1
+    ;;
+  5*)
+    ret=2
+    ;;
+  *)
+    ret=3
+    ;;
+esac
+
+if [[ $ret != 0 ]] ; then
+  echo "+++ Samson submission"
+  echo "HTTP code: $code"
+  cat "$tmpdir/samson_output"
+  echo
+  exit $ret
+else
+  echo "--- Samson submission"
+  echo "HTTP code: $code"
+fi

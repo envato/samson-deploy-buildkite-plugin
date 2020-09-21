@@ -14,7 +14,7 @@ The only required configuration is the Samson URL, available from the Project "W
 steps:
   - label: ":rocket: Deploy with Samson"
     plugins:
-      - envato/samson-deploy#v0.1.1:
+      - envato/samson-deploy#v0.1.2:
           url: "https://example.com/integrations/buildkite/578dc36a28ab49b2998603f0475211c3"
 ```
 

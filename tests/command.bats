@@ -1,14 +1,11 @@
 #!/usr/bin/env bats
 
-# Upstream PR to add this to the container https://github.com/buildkite-plugins/buildkite-plugin-tester/pull/25
-apk --no-cache add jq
-
 load "$BATS_PATH/load.bash"
 
 # Uncomment to enable stub debugging
 # export CURL_STUB_DEBUG=/dev/tty
 
-@test "calls git log" {
+setup() {
   export BUILDKITE_COMMIT="abc123"
   export BUILDKITE_PLUGIN_SAMSON_DEPLOY_URL="https://example.com"
   export BUILDKITE_BUILD_ID="1"
@@ -17,20 +14,46 @@ load "$BATS_PATH/load.bash"
   export BUILDKITE_MESSAGE="message"
   export BUILDKITE_BRANCH="branch"
   export BUILDKITE_SOURCE="source"
+  stub mktemp "-d : mkdir -p /tmp/foo ; echo /tmp/foo"
+}
 
-  expected_payload='{\n "event": "build.finished",\n  "build": {\n    "id": "1",\n    "url": "UNIMPLEMENTED",\n    "web_url": "example.com",\n    "number": 1,\n    "state": "passed",\n    "blocked": false,\n    "message": "message",\n    "commit": "abc123",\n    "branch": "branch",\n    "tag": null,\n    "source": "source",\n    "creator": null,\n    "created_at": "1970-01-01 00:00:00 UTC",\n    "scheduled_at": "1970-01-01 00:00:00 UTC",\n    "started_at": "1970-01-01 00:00:00 UTC",\n    "finished_at": "1970-01-01 00:00:00 UTC",\n    "meta_data": {},\n    "pull_request": null\n  },\n  "pipeline": {},\n  "sender": null\n}'
+@test "curl succeeds" {
 
-  stub curl "--fail \
---request POST \
---silent \
---show-error \
--H \"HTTP_X_BUILDKITE_EVENT: build.finished\" \
--H \"Content-Type: application/json\" \
--d '\'$expected_payload\'' : echo 201"
+  stub curl "* : echo 201 ; echo 'curl_output' > /tmp/foo/samson_output"
 
   run $PWD/hooks/command
 
   assert_output --partial "--- Sending Samson webhook"
+  assert_output --partial "HTTP code: 201"
+  refute_output --partial "curl_output"
   assert_success
+  unstub curl
+}
+
+@test "curl fails 4xx" {
+  expected_payload='{\n "event": "build.finished",\n  "build": {\n    "id": "1",\n    "url": "UNIMPLEMENTED",\n    "web_url": "example.com",\n    "number": 1,\n    "state": "passed",\n    "blocked": false,\n    "message": "message",\n    "commit": "abc123",\n    "branch": "branch",\n    "tag": null,\n    "source": "source",\n    "creator": null,\n    "created_at": "1970-01-01 00:00:00 UTC",\n    "scheduled_at": "1970-01-01 00:00:00 UTC",\n    "started_at": "1970-01-01 00:00:00 UTC",\n    "finished_at": "1970-01-01 00:00:00 UTC",\n    "meta_data": {},\n    "pull_request": null\n  },\n  "pipeline": {},\n  "sender": null\n}'
+
+  stub curl "* : echo 400 ; echo 'curl_output' > /tmp/foo/samson_output"
+
+  run $PWD/hooks/command
+
+  assert_output --partial "--- Sending Samson webhook"
+  assert_output --partial "HTTP code: 400"
+  assert_output --partial "curl_output"
+  assert_failure 1
+  unstub curl
+}
+
+@test "curl fails 5xx" {
+  expected_payload='{\n "event": "build.finished",\n  "build": {\n    "id": "1",\n    "url": "UNIMPLEMENTED",\n    "web_url": "example.com",\n    "number": 1,\n    "state": "passed",\n    "blocked": false,\n    "message": "message",\n    "commit": "abc123",\n    "branch": "branch",\n    "tag": null,\n    "source": "source",\n    "creator": null,\n    "created_at": "1970-01-01 00:00:00 UTC",\n    "scheduled_at": "1970-01-01 00:00:00 UTC",\n    "started_at": "1970-01-01 00:00:00 UTC",\n    "finished_at": "1970-01-01 00:00:00 UTC",\n    "meta_data": {},\n    "pull_request": null\n  },\n  "pipeline": {},\n  "sender": null\n}'
+
+  stub curl "* : echo 500 ; echo 'curl_output' > /tmp/foo/samson_output"
+
+  run $PWD/hooks/command
+
+  assert_output --partial "--- Sending Samson webhook"
+  assert_output --partial "HTTP code: 500"
+  assert_output --partial "curl_output"
+  assert_failure 2
   unstub curl
 }
