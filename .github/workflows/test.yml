@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: lint
-        run: lint --id envato/heroku-container-deploy
+        run: lint --id envato/samson-deploy
   plugin-shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
