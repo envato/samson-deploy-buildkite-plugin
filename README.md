@@ -1,6 +1,6 @@
 # Samson Deploy Buildkite Plugin
 
-[![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+[![tests](https://github.com/envato/samson-deploy-buildkite-plugin/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/envato/samson-deploy-buildkite-plugin/actions/workflows/tests.yml)
 
 A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) that lets you send webhooks to Samson.
 This is an alternative to using Buildkite Notifications,
